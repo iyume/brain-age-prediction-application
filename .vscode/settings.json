@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "rust-analyzer.linkedProjects": [
+    "./frontend/src-tauri/Cargo.toml"
+  ]
+}

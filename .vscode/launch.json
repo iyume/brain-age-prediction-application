@@ -1,0 +1,39 @@
+{
+  "configurations": [
+    {
+      "name": "Tauri Debug",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path=${workspaceFolder}/frontend/src-tauri/Cargo.toml",
+          "--no-default-features"
+        ]
+      },
+      "preLaunchTask": "frontend"
+    },
+    {
+      "name": "Frontend debug firefox (not work)",
+      "type": "firefox",
+      "request": "launch",
+      "url": "http://localhost:1420",
+      "webRoot": "${workspaceFolder}/frontend",
+      "preLaunchTask": "frontend",
+      "pathMappings": [
+        {
+          "url": "http://localhost:1420/src",
+          "path": "${workspaceFolder}/frontend/src"
+        }
+      ]
+    },
+    {
+      "name": "Frontend debug chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:1420",
+      "webRoot": "${workspaceFolder}/frontend",
+      "preLaunchTask": "frontend"
+    }
+  ]
+}
