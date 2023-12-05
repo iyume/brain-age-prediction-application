@@ -3,3 +3,5 @@ nibabel>=5.0
 numpy
 torch>=2.0
 scipy>=1.0
+matplotlib>=3.0
+fastapi
