@@ -12,15 +12,34 @@ import {
   NNumberAnimation,
   NStatistic,
   StatisticProps,
+  UploadFileInfo,
 } from "naive-ui";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
+import { ref } from "vue";
 
-type StatisticThemeOverrides = NonNullable<StatisticProps["themeOverrides"]>;
+const host = "http://127.0.0.1:8000";
 
 const stat1Overrides: StatisticThemeOverrides = {
   labelFontSize: "14px",
   valueFontSize: "34px",
 };
+
+const thumbnail = ref<string | undefined>(undefined);
+
+type StatisticThemeOverrides = NonNullable<StatisticProps["themeOverrides"]>;
+
+function handleFinish({
+  event,
+}: {
+  file: UploadFileInfo;
+  event?: ProgressEvent;
+}) {
+  const resp = (event?.target as XMLHttpRequest).response;
+  if (!resp) {
+    console.warn("not receive response");
+  }
+  thumbnail.value = JSON.parse(resp).thumbnail;
+}
 </script>
 
 <template>
@@ -39,9 +58,9 @@ const stat1Overrides: StatisticThemeOverrides = {
 
       <n-upload
         accept=".nii"
-        action="/"
+        :action="`${host}/get_thumbnail`"
+        @finish="handleFinish"
         :max="1"
-        :default-upload="false"
         style="width: 60%; margin: auto"
       >
         <n-upload-dragger>
@@ -55,6 +74,14 @@ const stat1Overrides: StatisticThemeOverrides = {
           </n-text>
         </n-upload-dragger>
       </n-upload>
+
+      <img
+        :src="thumbnail ? `data:image/png;base64,${thumbnail}` : undefined"
+        :hidden="thumbnail == undefined"
+        width="100"
+        height="100"
+        style="margin: auto"
+      />
 
       <div style="height: 48px; flex-shrink: 0"></div>
 
