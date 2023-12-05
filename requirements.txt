@@ -1,0 +1,5 @@
+# python>=3.8
+nibabel>=5.0
+numpy
+torch>=2.0
+scipy>=1.0

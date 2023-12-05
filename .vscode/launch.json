@@ -34,6 +34,14 @@
       "url": "http://localhost:1420",
       "webRoot": "${workspaceFolder}/frontend",
       "preLaunchTask": "frontend"
-    }
+    },
+    {
+      "name": "Python: test.py",
+      "type": "python",
+      "request": "launch",
+      "program": "test.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
   ]
 }
