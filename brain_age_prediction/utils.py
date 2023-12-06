@@ -88,8 +88,9 @@ class IXIDataset(Dataset):
         # 1.68s execute time
         # from (256,256,146/150) to (256,256,128)
         new_shape = (256, 256, 128)
-        real_resize_factor = tuple(map(operator.truediv, new_shape, img.shape))
-        img = nd.zoom(img, real_resize_factor, order=3)
+        if img.shape != new_shape:
+            real_resize_factor = tuple(map(operator.truediv, new_shape, img.shape))
+            img = nd.zoom(img, real_resize_factor, order=3)
         return torch.from_numpy(img)
 
 

@@ -41,11 +41,8 @@ class Evaluator:
             mae_errors.append(np.mean(np.abs(out - labels)))
         return np.mean(mae_errors)
 
-    def evaluate_files(
-        self,
-        nii_files: str | list[str],
-        print_metrics: bool = True,
-    ) -> list[float]:
+    def evaluate_files(self, nii_files: str | list[str]) -> list[float]:
+        # file -> ndarray -> transform
         images: list[torch.Tensor] = []  # (D,H,W)
         if isinstance(nii_files, str):
             nii_files = [nii_files]
@@ -57,17 +54,21 @@ class Evaluator:
         out = self.model(inputs)
         out = out.numpy(force=True)
         assert out.ndim == 1
-        out = list(out)
+        out = [i.item() for i in out]
         return out
 
-    # def evaluate(self, arrs: np.ndarray | list[np.ndarray]) -> list[float]:
-    #     if isinstance(arrs, list):
-    #         arrs = np.stack(arrs)
-    #     if arrs.ndim == 3:
-    #         arrs = np.expand_dims(arrs, 0)
-    #     elif arrs.ndim != 4:
-    #         raise ValueError(f"expect 3 or 4 dim, got {arrs.shape}")
-    #     inputs = torch.from_numpy(arrs)
-    #     inputs = inputs.to(self.device)
-    #     out = self.model(inputs)
-    #     return out.numpy(force=True)
+    def evaluate_ndarray(self, arrs: np.ndarray | list[np.ndarray]) -> list[float]:
+        if not isinstance(arrs, list):
+            arrs = [arrs]
+        tensors = [transform(i) for i in arrs]
+        tensors = torch.stack(tensors)
+        if tensors.ndim == 3:
+            tensors = tensors.unsqueeze_(0)
+        elif tensors.ndim != 4:
+            raise ValueError(f"expect 3 or 4 dim, got {tensors.shape}")
+        tensors = tensors.to(self.device)
+        out = self.model(tensors)
+        out = out.numpy(force=True)
+        assert out.ndim == 1
+        out = [i.item() for i in out]
+        return out

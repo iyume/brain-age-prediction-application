@@ -47,7 +47,7 @@
       "name": "Python: fastapi server",
       "type": "python",
       "request": "launch",
-      "program": "scripts/run_server.py",
+      "program": "${workspaceFolder}/run_server.py",
       "cwd": "${workspaceFolder}"
     }
   ]

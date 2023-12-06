@@ -7,6 +7,7 @@ import {
   NText,
   NIcon,
   NButton,
+  lightTheme,
   darkTheme,
   NConfigProvider,
   NNumberAnimation,
@@ -14,8 +15,13 @@ import {
   StatisticProps,
   UploadFileInfo,
 } from "naive-ui";
-import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
-import { ref } from "vue";
+import {
+  ArchiveOutline as ArchiveIcon,
+  CloseOutline as CloseIcon,
+  CheckmarkOutline as CheckIcon,
+} from "@vicons/ionicons5";
+import { usePreferredColorScheme } from "@vueuse/core";
+import { ref, computed } from "vue";
 
 const host = "http://127.0.0.1:8000";
 
@@ -24,26 +30,82 @@ const stat1Overrides: StatisticThemeOverrides = {
   valueFontSize: "34px",
 };
 
-const thumbnail = ref<string | undefined>(undefined);
+type UploadRespJson = {
+  file_id: string;
+  thumbnail: string; // base64 string
+};
+const currentFile = ref<UploadRespJson | undefined>(undefined);
+
+const predictLoading = ref<boolean>(false);
+const predictResult = ref<number | null>(null);
 
 type StatisticThemeOverrides = NonNullable<StatisticProps["themeOverrides"]>;
 
-function handleFinish({
-  event,
-}: {
+const preferredColor = usePreferredColorScheme();
+const preferredTheme = computed(
+  () =>
+    ({ light: lightTheme, dark: darkTheme, "no-preference": lightTheme }[
+      preferredColor.value
+    ])
+);
+
+const serverStatus = ref<boolean>(false);
+// get once
+(() => {
+  let req = new XMLHttpRequest();
+  req.open("GET", `${host}/ping`, true);
+  req.onload = () => {
+    if (req.status == 200) {
+      serverStatus.value = true;
+    }
+  };
+  req.send();
+})();
+
+function handleFinish(options: {
   file: UploadFileInfo;
   event?: ProgressEvent;
 }) {
-  const resp = (event?.target as XMLHttpRequest).response;
+  const resp = (options.event?.target as XMLHttpRequest).response;
   if (!resp) {
     console.warn("not receive response");
   }
-  thumbnail.value = JSON.parse(resp).thumbnail;
+  const resp_json: UploadRespJson = JSON.parse(resp);
+  currentFile.value = resp_json;
+  return options.file;
+}
+
+function handleRemove(options: {
+  file: UploadFileInfo;
+  fileList: Array<UploadFileInfo>;
+}) {
+  options;
+  currentFile.value = undefined;
+  return true;
+}
+
+function handlePredict() {
+  const file_id = currentFile.value?.file_id;
+  if (!file_id) {
+    return;
+  }
+  predictLoading.value = true;
+  let req = new XMLHttpRequest();
+  req.open("POST", `${host}/evaluate`, true);
+  req.setRequestHeader("Content-Type", "application/json");
+  req.onload = () => {
+    if (req.status == 200) {
+      predictResult.value = JSON.parse(req.response).result;
+    }
+    predictLoading.value = false;
+  };
+  const data = JSON.stringify({ file_id });
+  req.send(data);
 }
 </script>
 
 <template>
-  <n-config-provider :theme="darkTheme">
+  <n-config-provider :theme="preferredTheme">
     <div class="container">
       <div style="height: 10%"></div>
 
@@ -60,6 +122,7 @@ function handleFinish({
         accept=".nii"
         :action="`${host}/get_thumbnail`"
         @finish="handleFinish"
+        @remove="handleRemove"
         :max="1"
         style="width: 60%; margin: auto"
       >
@@ -75,17 +138,28 @@ function handleFinish({
         </n-upload-dragger>
       </n-upload>
 
+      <n-text :hidden="currentFile == undefined">上传成功！</n-text>
       <img
-        :src="thumbnail ? `data:image/png;base64,${thumbnail}` : undefined"
-        :hidden="thumbnail == undefined"
+        :src="
+          currentFile
+            ? `data:image/png;base64,${currentFile.thumbnail}`
+            : undefined
+        "
+        :hidden="currentFile == undefined"
         width="100"
         height="100"
+        alt="MRI 缩略图"
         style="margin: auto"
       />
 
-      <div style="height: 48px; flex-shrink: 0"></div>
+      <div style="height: 24px; flex-shrink: 0"></div>
 
-      <n-button type="primary" size="large" style="margin: auto"
+      <n-button
+        type="primary"
+        size="large"
+        style="margin: auto"
+        @click="handlePredict"
+        :loading="predictLoading"
         >预测年龄</n-button
       >
 
@@ -98,7 +172,7 @@ function handleFinish({
           <n-number-animation
             ref="numberAnimationInstRef"
             :from="0"
-            :to="80"
+            :to="predictResult || 0"
             :precision="2"
           />
           <template #suffix> 岁</template>
@@ -107,7 +181,17 @@ function handleFinish({
 
       <div style="flex-grow: 1"></div>
 
-      <n-text>后端状态 {{ "🟢🔴" }}</n-text>
+      <n-text style="align-self: center; display: flex; align-items: center">
+        后端状态
+        <check-icon
+          v-if="serverStatus"
+          style="color: #08b45f; margin-left: 4px; width: 30px; height: 30px"
+        />
+        <close-icon
+          v-else
+          style="color: #d3302e; margin-left: 4px; width: 30px; height: 30px"
+        />
+      </n-text>
       <div style="height: 10%"></div>
     </div>
   </n-config-provider>

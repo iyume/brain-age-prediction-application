@@ -34,11 +34,12 @@
     },
     "windows": [
       {
+        "theme": "Dark",
         "fullscreen": false,
         "resizable": true,
         "title": "brain-age-prediction",
-        "width": 800,
-        "height": 600
+        "width": 1000,
+        "height": 800
       }
     ]
   }
