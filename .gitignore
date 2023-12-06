@@ -352,6 +352,7 @@ yarn-error.log
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,vuejs,node,rust,python
 
-/ckpt
+/ckpt/*
+!/ckpt/model_v1_epoch100.pth
 /datasets/*
 !/datasets/IXI.csv
