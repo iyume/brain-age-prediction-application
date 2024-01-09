@@ -37,20 +37,6 @@ class Bottleneck(nn.Module):
 class BrainAgePredictionResNet(nn.Module):
     version = "v1"
 
-    # def __init__(self) -> None:
-    #     super().__init__()
-    #     # (N,1,256,256,128)
-    #     self.conv0 = Bottleneck(1, 8, midc=8)
-    #     self.conv1 = Bottleneck(8, 16, stride=2)
-    #     # (N,16,128,128,64)
-    #     self.conv2 = Bottleneck(16, 32, stride=2)
-    #     # (N,32,64,64,32)
-    #     self.conv3 = Bottleneck(32, 64, stride=2)
-    #     # (N,64,32,32,16)
-    #     self.conv4 = Bottleneck(64, 128, stride=2)
-    #     # (N,128,16,16,8)
-    #     self.linear1 = nn.Linear(128 * 16 * 16 * 8, 1)
-
     def __init__(self) -> None:
         super().__init__()
         # (N,1,256,256,128)
