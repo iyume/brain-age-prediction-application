@@ -6,8 +6,8 @@
 
 ![](./assets/frontend3.png)
 
-![](./assets/视频.mp4)
-
 ## More
+
+https://github.com/iyume/brain-age-prediction-application/blob/main/assets/视频.mp4
 
 Report has been archived and committed to school grading space.
